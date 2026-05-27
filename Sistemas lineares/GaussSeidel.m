@@ -13,26 +13,22 @@ function [x, k, historico_erros] = GaussSeidel(A, b, x0, tol, max_iter)
         end
         beta(i) = soma / abs(A(i, i));
     end
-    if max(beta) >= 1
+    
+    max_beta = 0;
+    for i=1:n
+        if beta(i) > max_beta
+            max_beta = beta(i);
+        end
+    end
+    
+    if max_beta >= 1
         warning('Matriz nao atende ao criterio de Sassenfeld para Gauss-Seidel.');
+    else
+        disp('Criterio de Sassenfeld atendido com sucesso!');
     end
 
-    % --- CÁLCULO E EXIBIÇÃO MATRICIAL DO SEIDEL ---
-    D = diag(diag(A));
-    L = tril(A) - D;
-    U = triu(A) - D;
-
-    C_gs = -inv(D + L) * U;
-    d_gs = inv(D + L) * b;
-
     fprintf('\n=======================================================\n');
-    fprintf('     SISTEMA NO FORMATO DE MATRIZ (GAUSS-SEIDEL)       \n');
-    fprintf('=======================================================\n');
-    disp('Matriz de Iteracao C_gs:'), disp(C_gs)
-    disp('Vetor de Carga d_gs:'), disp(d_gs)
-
-    fprintf('=======================================================\n');
-    fprintf('               EVOLUÇÃO GAUSS-SEIDEL                   \n');
+    fprintf('               EVOLUCAO GAUSS-SEIDEL                   \n');
     fprintf('=======================================================\n');
     fprintf('%-5s | ', 'Iter');
     for i = 1:n
@@ -41,9 +37,9 @@ function [x, k, historico_erros] = GaussSeidel(A, b, x0, tol, max_iter)
     fprintf('%-10s\n', 'Erro');
     fprintf('%s\n', repmat('-', 1, 11 + n*15));
 
-    % Iterações de Seidel
     x = x0;
-    historico_erros = []
+    historico_erros = [];
+    
     for k = 1:max_iter
         x_antigo = x;
         for i = 1:n
@@ -53,11 +49,22 @@ function [x, k, historico_erros] = GaussSeidel(A, b, x0, tol, max_iter)
                     soma = soma + A(i, j) * x(j);
                 end
             end
-            % Atualiza diretamente na variável x para usar o valor mais recente
             x(i) = (b(i) - soma) / A(i, i);
         end
 
-        erro = max(abs((x - x_antigo) ./ x));
+        % Cálculo seguro do erro relativo
+        max_diff = 0;
+        max_x = 0;
+        for i = 1:n
+            if abs(x(i) - x_antigo(i)) > max_diff
+                max_diff = abs(x(i) - x_antigo(i));
+            end
+            if abs(x(i)) > max_x
+                max_x = abs(x(i));
+            end
+        end
+        erro = max_diff / max_x;
+        
         historico_erros(k) = erro;
 
         fprintf('%-5d | ', k);
@@ -70,5 +77,5 @@ function [x, k, historico_erros] = GaussSeidel(A, b, x0, tol, max_iter)
             return;
         end
     end
-    warning('Gauss-Seidel atingiu o maximo de iteracoes.');
+    warning('Gauss-Seidel atingiu o maximo de iteracoes sem convergir.');
 end
