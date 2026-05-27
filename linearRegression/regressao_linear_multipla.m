@@ -31,5 +31,5 @@ function c = regressao_linear_multipla(X, y)
     end
     
     % Resolve o sistema linear sem usar funções prontas
-    c = eliminar_gauss(A, b);
+    c = gaussPivotParc(A, b);
 end
