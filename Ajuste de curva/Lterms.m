@@ -1,4 +1,5 @@
 function terms = Lterms(xs, x_target, n)
+    terms = zeros(n, 1);
     for k = 1:n
       num = 1;
       deno = 1;
