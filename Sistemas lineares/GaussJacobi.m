@@ -1,9 +1,15 @@
 function [x, k, historico_erros] = GaussJacobi(A, b, x0, tol, max_iter)
-      % Verifica o Critério de Linhas
     n = size(A, 1);
+    
+    % Verifica o Critério de Linhas (Totalmente manual)
     criterio_atendido = true;
     for i = 1:n
-        soma_linha = sum(abs(A(i, :))) - abs(A(i, i));
+        soma_linha = 0;
+        for j = 1:n
+            if i ~= j
+                soma_linha = soma_linha + abs(A(i, j));
+            end
+        end
         if abs(A(i, i)) <= soma_linha
             criterio_atendido = false;
         end
@@ -16,7 +22,7 @@ function [x, k, historico_erros] = GaussJacobi(A, b, x0, tol, max_iter)
     end
 
     % Construção das matrizes de iteração C e d
-    C = zeros(n);
+    C = zeros(n, n);
     d = zeros(n, 1);
     for i = 1:n
         d(i) = b(i) / A(i, i);
@@ -27,7 +33,6 @@ function [x, k, historico_erros] = GaussJacobi(A, b, x0, tol, max_iter)
         end
     end
 
-    % --- EXIBIÇÃO DAS MATRIZES DO SISTEMA ITERATIVO ---
     fprintf('\n=======================================================\n');
     fprintf('        SISTEMA NO FORMATO DE MATRIZ (JACOBI)          \n');
     fprintf('=======================================================\n');
@@ -35,7 +40,7 @@ function [x, k, historico_erros] = GaussJacobi(A, b, x0, tol, max_iter)
     disp('Vetor de Carga d:'), disp(d)
 
     fprintf('=======================================================\n');
-    fprintf('                  EVOLUÇÃO JACOBI                      \n');
+    fprintf('                 EVOLUCAO JACOBI                       \n');
     fprintf('=======================================================\n');
     fprintf('%-5s | ', 'Iter');
     for i = 1:n
@@ -44,14 +49,33 @@ function [x, k, historico_erros] = GaussJacobi(A, b, x0, tol, max_iter)
     fprintf('%-10s\n', 'Erro');
     fprintf('%s\n', repmat('-', 1, 11 + n*15));
 
-    % Processo Iterativo
     historico_erros = [];
     x_antigo = x0;
+    x = zeros(n, 1);
+    
     for k = 1:max_iter
-        x = C * x_antigo + d;
+        % Iteração manual (x = C * x_antigo + d)
+        for i = 1:n
+            soma = 0;
+            for j = 1:n
+                soma = soma + C(i, j) * x_antigo(j);
+            end
+            x(i) = soma + d(i);
+        end
 
-        % Critério de parada: erro relativo percentual
-        erro = max(abs((x - x_antigo) ./ x));
+        % Cálculo seguro do erro relativo (Norma Infinito)
+        max_diff = 0;
+        max_x = 0;
+        for i = 1:n
+            if abs(x(i) - x_antigo(i)) > max_diff
+                max_diff = abs(x(i) - x_antigo(i));
+            end
+            if abs(x(i)) > max_x
+                max_x = abs(x(i));
+            end
+        end
+        erro = max_diff / max_x;
+        
         historico_erros(k) = erro;
 
         fprintf('%-5d | ', k);
