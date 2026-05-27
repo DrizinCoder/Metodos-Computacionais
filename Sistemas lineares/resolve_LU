@@ -1,0 +1,31 @@
+function x = resolve_LU(L, U, b)
+    n = size(L, 1);
+    y = zeros(n, 1);
+    x = zeros(n, 1);
+
+    % Passo 1: Substituição para frente (Ly = b)
+    y(1) = b(1) / L(1, 1); 
+    for i = 2:n
+        soma = 0;
+        for j = 1:i-1
+            soma = soma + L(i, j) * y(j);
+        end
+        y(i) = (b(i) - soma) / L(i, i);
+    end
+    
+    disp('Vetor intermediário y (Ly = b):');
+    disp(y);
+
+    % Passo 2: Substituição para trás (Ux = y)
+    x(n) = y(n) / U(n, n);
+    for i = n-1:-1:1
+        soma = 0;
+        for j = i+1:n
+            soma = soma + U(i, j) * x(j);
+        end
+        x(i) = (y(i) - soma) / U(i, i);
+    end
+    
+    disp('Vetor solução x (Ux = y):');
+    disp(x);
+end
