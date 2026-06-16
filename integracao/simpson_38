@@ -1,0 +1,29 @@
+function I = simpson38_composto_for(f, a, b, n)
+    % Validação: n precisa ser múltiplo de 3
+    if mod(n, 3) ~= 0
+        error('Para o método de Simpson 3/8, o número de subintervalos (n) deve ser múltiplo de 3.');
+    end
+
+    h = (b - a) / n;
+
+    % Inicializa os somatórios
+    soma_multiplos_3 = 0; 
+    soma_resto = 0; 
+
+    % Laço de i = 1 até n-1
+    for i = 1:(n - 1)
+        xi = a + i * h;
+
+        % Verifica se o índice i é múltiplo de 3
+        if mod(i, 3) == 0
+            % Se 'i' for múltiplo de 3, vai para o somatório que multiplica por 2
+            soma_multiplos_3 = soma_multiplos_3 + f(xi);
+        else
+            % Caso contrário (não é múltiplo), vai para o somatório que multiplica por 3
+            soma_resto = soma_resto + f(xi);
+        end
+    end
+
+    % Aplica a fórmula final da regra 3/8
+    I = (3 * h / 8) * (f(a) + 3 * soma_resto + 2 * soma_multiplos_3 + f(b));
+endfunction
